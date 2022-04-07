@@ -7,6 +7,7 @@ open import boole using (𝕥; 𝕗; 𝔹)
 -- Naloge rešujte brez uporabe dokazov. 
 -- V kolikor se agda pritoži to pomeni, da je potrebno implementacijo nekoliko popraviti.
 
+-- kot da je v svoji datoteki
 module Maybe where
     data Maybe (A : Set) : Set where
         nothing : Maybe A
@@ -22,7 +23,6 @@ module Fin where
         Fs : {n : ℕ} -> Fin n -> Fin (S n)
     
 open Fin
-
 
 module Pair where
 
@@ -40,7 +40,10 @@ par = record { fst = O; snd = (𝕥 , 𝕗) }
 -- Destrukcija
 swap : {A B : Set} → Pair A B → Pair B A
 -- Prek vzorca ali s funkcijo
-swap p@(_ , s) = (s , Pair.fst p )
+swap x@(fst , snd) = snd , Pair.fst x
+
+-- lahko bi kar
+-- swap (fst , snd) = snd , fst  
 
 -- Najprej ponovimo osnovno programiranje s seznami
 
@@ -55,27 +58,35 @@ module List where
         _∷_ : A → List A → List A
 
     l1 : List ℕ
-    l1 = {!   !}
+    l1 = []
 
     l2 : List ℕ
-    l2 = {!   !}
+    l2 = O ∷ []
 
     l3 : List ℕ
-    l3 = {!   !}
+    l3 = O ∷ S O ∷ []
 
     -- Definirajte nekaj osnovnih operacij na seznamih
     -- V pomoč naj vam bodo testi na koncu funkcij
-    _++_ : {!   !}
-    _++_ = {!   !}
+    _++_ : {A : Set} → List A → List A → List A
+    [] ++ ys = ys
+    x ∷ xs ++ ys = x ∷ (xs ++ ys)
 
-    len : {!   !}
-    len = {!   !}
+    len : {A : Set} → List A → ℕ
+    len [] = O
+    len (x ∷ xs) = S (len xs)
 
-    reverse : {!   !}
-    reverse = {!   !}
+    reverse : {A : Set} → List A → List A
+    reverse xs = reverse-aux xs []
+        where
+            reverse-aux : {B : Set} → List B → List B → List B
+            reverse-aux [] acc = acc
+            reverse-aux (x ∷ xs) acc = reverse-aux xs (x ∷ acc)
+    -- reverse (x ∷ xs) = (reverse xs) ++ (x ∷ [])
 
-    map : {!   !}
-    map = {!   !}
+    map : {A B : Set} → (A → B) → List A → List B
+    map f [] = []
+    map f (x ∷ xs) = (f x) ∷ (map f xs)
 
     -- Ko potrebujemo dodatno informacijo si pomagamo z with
 
@@ -85,8 +96,17 @@ module List where
     ... | 𝕗 = filter f l
     ... | 𝕥 = x ∷ (filter f l)
 
-    _[_] : {!   !}
-    _[_] = {!   !}
+    _[_] : {A : Set} → List A → ℕ → Maybe A
+    [] [ n ] = nothing
+    x ∷ xs [ O ] = just x
+    x ∷ xs [ S n ] = xs [ n ]
+
+    test : List ℕ
+    test = S (S (S O)) ∷ S (S O) ∷ S O ∷ O ∷ []
+
+    f : ℕ → 𝔹
+    f O = 𝕗
+    f (S n) = 𝕥
 
 -- Odvisni tipi
 
@@ -110,50 +130,76 @@ module Vector where
     -- Za določene tipe vektorjev lahko vedno dobimo glavo in rep
 
     head : {A : Set} → {n : ℕ} → Vector A (S n) → A
-    head = {!   !}
+    head (x ∷ xs) = x
 
-    tail : {!   !}
-    tail = {!   !}
+    tail : {A : Set} → {n : ℕ} → Vector A (S n) → Vector A n
+    tail (x ∷ xs) = xs
 
-    map : {!   !}
-    map = {!   !}
+    map : {A B : Set} → {n : ℕ} → (A → B) → Vector A n → Vector B n
+    map f [] = []
+    map f (x ∷ xs) = f x ∷ map f xs
 
     -- Sedaj lahko napišemo bolj informativni obliki funkcij `zip` in `unzip`
 
     zip : {A B : Set} → {n : ℕ} → Vector A n → Vector B n → Vector (Pair A B) n
-    zip = {!   !}
+    zip [] [] = []
+    zip (x ∷ xs) (y ∷ ys) = (x , y) ∷ (zip xs ys)
 
-    unzip : {!   !}
-    unzip = {!   !}
+    unzip : {A B : Set} → {n : ℕ} → Vector (Pair A B) n → Pair (Vector A n) (Vector B n)
+    unzip [] = [] , []
+    unzip ((fst , snd) ∷ xs) with unzip xs
+    ... | a , b = (fst ∷ a) , (snd ∷ b)
 
     -- S pomočjo tipa `Fin` je indeksiranje varno
     -- Namig: Naj vam agda pomaga pri vzorcih (hkrati lahko razbijemo več vzorcev nanekrat)
     _[_] : {A : Set} {n : ℕ} -> Vector A n -> Fin n -> A
-    _[_] = {!   !}
+    [] [ () ]       -- ta primer se ne more zgoditi
+    x ∷ xs [ Fo ] = x
+    x ∷ xs [ Fs i ] = xs [ i ]
+
+    -- pogledamo si lift Fin n, ki ohrani vrednost, a dvigne tip
 
     -- Dobro preučite tip in povejte kaj pomeni
     fromℕ : (n : ℕ) → Fin (S n)
-    fromℕ = {!   !}
+    fromℕ O = Fo
+    fromℕ (S n) = Fs (fromℕ n)
 
-    toℕ : {!   !}
-    toℕ = {!   !}
+    toℕ : {n : ℕ} → Fin n → ℕ
+    toℕ Fo = O
+    toℕ (Fs i) = S (toℕ i)
     
     init : {A : Set} → (n : ℕ) → (x : A) -> Vector A n
-    init = {!   !}
+    init O x = []
+    init (S n) x = x ∷ (init n x)
     
-    vecToList : {!   !}
-    vecToList = {!   !}
+    vecToList : {A : Set} {n : ℕ} → Vector A n → List.List A
+    vecToList [] = List.[]
+    vecToList (x ∷ xs) = x List.∷ (vecToList xs)
 
     -- V tipih lahko nastopaju tudi povsem običajne funkcije
 
     listToVec : {A : Set} {n : ℕ} → (l : List.List A) → Vector A (List.len l)
-    listToVec = {!   !}
+    listToVec List.[] = []
+    listToVec (x List.∷ xs) = x ∷ (listToVec xs)
 
     count : {A : Set} {n : ℕ} → (f : A → 𝔹) → (v : Vector A n) → ℕ
-    count = {!   !}
+    count f [] = O
+    count f (x ∷ xs) with f x
+    ... | 𝕥 = S (count f xs)
+    ... | 𝕗 = count f xs
 
-    filterV : {A : Set} {n : ℕ} → (f : A → 𝔹) → (v : Vector A n) → (Vector A {!   !}) 
-    filterV = {!   !}
+    filterV : {A : Set} {n : ℕ} → (f : A → 𝔹) → (v : Vector A n) → (Vector A (count f v)) 
+    filterV f [] = []
+    filterV f (x ∷ xs) with f x
+    ... | 𝕥 = x ∷ (filterV f xs)
+    ... | 𝕗 = filterV f xs
+
+    test : Vector ℕ (S (S (S (S O))))
+    test = S (S (S O)) ∷ S (S O) ∷ S O ∷ O ∷ []
+
+    f : ℕ → 𝔹
+    f O = 𝕗
+    f (S n) = 𝕥
 
 
 -- Nekoliko posplošimo seznam
@@ -165,19 +211,26 @@ module Line where
         _::_ : {n m : ℕ} → Vector.Vector A m → Line A n → Line A (S n)
 
     lineLen : {A : Set} {n : ℕ} → Line A n → ℕ
-    lineLen = {!   !}
+    lineLen [] = O
+    lineLen (_::_ {n} {m} x xs) = m + lineLen xs
 
     flattenL : {A : Set} {n : ℕ} → (lin : Line A n) → Vector.Vector A (lineLen lin) 
-    flattenL = {!   !}
+    flattenL [] = Vector.[]
+    flattenL (x :: xs) = x Vector.++ flattenL xs 
     
     map : ∀ { A B : Set } {n : ℕ}  → (A -> B) → Line A n → Line B n
-    map = {!   !}
+    map f [] = []
+    map f (x :: xs) = Vector.map f x :: map f xs
 
     foldrL : ∀ {A B : Set} {n : ℕ} → (∀ {n : ℕ} → Vector.Vector A n → B → B) → B → (Line A n) → B
-    foldrL = {!   !}
+    foldrL f b [] = b
+    foldrL f b (x :: xs) = f x (foldrL f b xs)
 
     lineLen2 : ∀ {A : Set} {n : ℕ} → (Line A n) → ℕ
     lineLen2 = foldrL (λ {n} _ s → n + s ) O 
+
+    l1 : Line ℕ (S (S O))
+    l1 = (Vector.test) :: ((O Vector.∷ O Vector.∷ Vector.[]) :: [])
 
 
 module Tree where
@@ -187,7 +240,7 @@ module Tree where
 
     collect : ∀ {n : ℕ} {A : Set} → Tree A n → Vector.Vector A n
     collect (Leaf x) = x Vector.∷ Vector.[]
-    collect (Node n m l x r) = {!   !} 
+    collect (Node n m l x r) = (collect l) Vector.++ x Vector.∷ (collect r)
 
     -- Malo popravi definicijo drevesa in potem ustrezno popravi še definicijo collect da se izogneš dokazom
 
@@ -207,4 +260,4 @@ module Variadic where
             variadicSum' (S a) cur = \x → variadicSum' a (cur + x)
 
     a : ℕ
-    a = variadicSum (S (S (S O))) O (S O) (S O)
+    a = variadicSum (S (S (S O))) O (S O) (S O) 
