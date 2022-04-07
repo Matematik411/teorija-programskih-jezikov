@@ -15,23 +15,23 @@ kernelspec:
 
 ## Abstraktna sintaksa
 
-aritmetični izraz _e_ ::= _#l_
-     | _n_
-     | _e1_ `+` _e2_
-     | _e1_ `-` _e2_
-     | _e1_ `*` _e2_
+    aritmetični izraz _e_ ::= _#l_
+        | _n_
+        | _e1_ `+` _e2_
+        | _e1_ `-` _e2_
+        | _e1_ `*` _e2_
 
-Booleov izraz _b_ ::= `true`
-     | `false`
-     | _e1_ `=` _e2_
-     | _e1_ `<` _e2_
-     | _e1_ `>` _e2_
+    Booleov izraz _b_ ::= `true`
+        | `false`
+        | _e1_ `=` _e2_
+        | _e1_ `<` _e2_
+        | _e1_ `>` _e2_
 
-ukaz _c_ ::= `if` _b_ `then` _c1_ `else` _c2_
-     | `while` _b_ `do` _c_
-     | _c1_ `;` _c2_
-     | _l_ `:=` _e_
-     | `skip`
+    ukaz _c_ ::= `if` _b_ `then` _c1_ `else` _c2_
+        | `while` _b_ `do` _c_
+        | _c1_ `;` _c2_
+        | _l_ `:=` _e_
+        | `skip`
 
 ## Konkretna sintaksa z ignoriranimi presledki
 
@@ -81,31 +81,25 @@ ukaz _c_ ::= `if` _b_ `then` _c1_ `else` _c2_
 ## Vaje
 
 ### Naloga 1
+
 Napišite sintaktično drevo, ki ustreza programom:
 
-```
-#a := 2 + #b
-```
+    #a := 2 + #b
 
-```
-if #x = 2 then 
-  #x := 3
-else
-  skip
-```
+    if #x = 2 then 
+      #x := 3
+    else
+      skip
 
-```
-while #z > 0 do 
-  #z := #z - 1;
-  #w := #z + #w
-```
+    while #z > 0 do 
+      #z := #z - 1;
+      #w := #z + #w
 
-```
-(while #z > 0 do #z := #z - 1);
-#w := #z + #w
-```
+    (while #z > 0 do #z := #z - 1);
+    #w := #z + #w
 
 ### Naloga 2
+
 Programe najprej napišite v OCamlu, nato pa jih prevedite v programski jezik IMP s predavanj.
 
 1. Napišite program, ki sešteje vsa naravna števila manjša od `n`.
@@ -113,6 +107,7 @@ Programe najprej napišite v OCamlu, nato pa jih prevedite v programski jezik IM
 2. Napišite program, ki preveri ali je podano število praštevilo.
 
 ### Naloga 3
+
 Razmislite, kako bi dopolnili sintakso in evaluator jezika IMP za:
 
 1. logična veznika `&&` in `||`,
@@ -122,12 +117,14 @@ Razmislite, kako bi dopolnili sintakso in evaluator jezika IMP za:
 3. ukaz `fail`, ki prekine izvajanje programa.
 
 ### Naloga 4
+
 Izboljšajte parser, da bo dopolnil nepopolne `if` stavke. Ukaz `if b then c` naj se prevede v enako sintaktično drevo kot `if b then c else skip`.
 
 ### Naloga 5
+
 Dopolnite vse dele IMPa s podporo za `for` zanke oblike:
-```
-for #x := 0 to 100 do
-  cmd
-```
+
+    for #x := 0 to 100 do
+      cmd
+
 Pri tem sta `0` in `100` seveda zgolj zgled poljubnih aritmetičnih izrazov.

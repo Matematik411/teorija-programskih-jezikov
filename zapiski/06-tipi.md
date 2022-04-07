@@ -1,8 +1,8 @@
-# Izrek o varnosti za λ-račun
+# Tipi
 
 ## Definicija jezika
 
-### Sintaksa
+### Sintaksa izrazov
 
 Vzemimo λ-račun, kot smo ga spoznali na predavanjih:
 
@@ -87,13 +87,15 @@ Operacijsko semantiko podamo z malimi koraki:
     ----------------------
     (λx. M) V  ↝  M[V / x]
 
-### Tipi
+### Sintaksa tipov
 
 Tipi so:
 
     A, B ::= bool
            | int
            | A → B
+
+### Pravila za določanje tipov
 
 Pravila za določanje tipov pa so:
 
@@ -202,11 +204,11 @@ Z indukcijo na izpeljavo `Γ, x : A, Γ' ⊢ M : B`.
 ### Trditev (napredek)
 
 Če velja `⊢ M : A`, tedaj:
+
 1. je `M` vrednost ali
 2. obstaja `M'`, da velja `M ↝ M'`.
 
-#### Dokaz
-
+**Dokaz.**
 Z indukcijo na predpostavko o določenem tipu.
 Če je zaključek zadnjega uporabljenega pravila:
 
@@ -256,8 +258,7 @@ Z indukcijo na predpostavko o določenem tipu.
 
 Če velja `Γ ⊢ M : A` in `M ↝ M'`, tedaj velja tudi `Γ ⊢ M' : A`.
 
-#### Dokaz
-
+**Dokaz.**
 Z indukcijo na predpostavko o koraku.
 Če je zaključek zadnjega uporabljenega pravila:
 
@@ -313,9 +314,7 @@ Z indukcijo na predpostavko o koraku.
 
 Izračunajte naslednji izraz:
 
-```
-(rec f x. if x = 0 then 1 else x * f (x - 1)) 3
-```
+    (rec f x. if x = 0 then 1 else x * f (x - 1)) 3
 
 ### Naloga 2
 
