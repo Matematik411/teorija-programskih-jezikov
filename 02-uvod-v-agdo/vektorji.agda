@@ -27,3 +27,6 @@ _[_]←_ : {A : Set} {n : ℕ} -> Vec A n -> Fin n → A -> Vec A n
 _[_]←_ [] ()
 _[_]←_ (x ∷ xs) Fo v = v ∷ xs
 _[_]←_ (x ∷ xs) (Fs i) v = x ∷ (xs [ i ]← v)
+
+test : Vec ℕ 3
+test = 3 ∷ (2 ∷ (1 ∷ []))
