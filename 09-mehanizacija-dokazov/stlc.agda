@@ -10,8 +10,8 @@ data _∈_ : Ty → Ctx → Set where
     Z : {A : Ty} {Γ : Ctx} → A ∈ (Γ , A)
     S : {A B : Ty} {Γ : Ctx} → A ∈ Γ → A ∈ (Γ , B)
 
-data _⊢_ : Ctx → Ty → Set where
 
+data _⊢_ : Ctx → Ty → Set where
     VAR : {Γ : Ctx} {A : Ty} →
         A ∈ Γ →
         -----
@@ -32,16 +32,66 @@ data _⊢_ : Ctx → Ty → Set where
         -----
         Γ ⊢ A
 
+    -- aplikacija 
     _∙_ : {Γ : Ctx} {A B : Ty} →
         Γ ⊢ (A ⇒ B) →
         Γ ⊢ A →
         -----
         Γ ⊢ B
 
-    ƛ : {Γ : Ctx} {A B : Ty} →
+    ƛ : {Γ : Ctx} {A B : Ty} → 
         (Γ , A) ⊢ B →
         -----------
         Γ ⊢ (A ⇒ B)
+
+
+ext : { Γ Δ : Ctx}
+    → ({A : Ty} → A ∈ Γ → A ∈ Δ)
+    -----------------------------
+    → {A B : Ty} → A ∈ (Γ , B) → A ∈ (Δ , B)
+ext {Δ = Δ} σ {A} Z = Z
+ext {Δ = Δ} σ {A} (S aInGb) = S (σ aInGb) 
+
+rename : { Γ Δ : Ctx} 
+    → ({A : Ty} → A ∈ Γ → A ∈ Δ)
+    -----------------------------
+    → {A : Ty} → Γ ⊢ A → Δ ⊢ A
+rename σ (VAR x) = VAR (σ x)
+rename σ TRUE = TRUE
+rename σ FALSE = FALSE
+rename σ (IF GtA THEN GtA₁ ELSE GtA₂) = IF (rename σ GtA) THEN (rename σ GtA₁) ELSE (rename σ GtA₂)
+rename σ (GtA ∙ GtA₁) = (rename σ GtA) ∙ (rename σ GtA₁)
+rename σ (ƛ GtA) = ƛ (rename (ext σ) GtA)
+
+exts : {Γ Δ : Ctx}
+    → ( {A : Ty} → A ∈ Γ → Δ ⊢ A )
+    -------------------------------
+    → {A B : Ty} → A ∈ (Γ , B) → (Δ , B) ⊢ A
+exts σ Z = VAR Z
+exts σ (S AinGb) = rename S (σ AinGb)
+
+substMulti : { Γ Δ : Ctx }
+    → ({A : Ty} → A ∈ Γ → Δ ⊢ A)
+    -----------------------------
+    → {A : Ty} → Γ ⊢ A → Δ ⊢ A 
+substMulti σ (VAR x) = σ x
+substMulti σ TRUE = TRUE
+substMulti σ FALSE = FALSE
+substMulti σ (IF GtA THEN GtA₁ ELSE GtA₂) = IF (substMulti σ GtA) THEN (substMulti σ GtA₁) ELSE (substMulti σ GtA₂)
+substMulti σ (GtA ∙ GtA₁) = substMulti σ GtA ∙ substMulti σ GtA₁
+substMulti σ (ƛ GtA) = ƛ (substMulti (exts σ) GtA)
+
+_[_] : {Γ : Ctx} { A B : Ty}
+    → (Γ , B) ⊢ A
+    → Γ ⊢ B
+    ----------------
+    → Γ ⊢ A
+_[_] {Γ} {B = B} N M = substMulti σ N
+    where
+    σ : ∀ {A : Ty} → A ∈ (Γ , B) → Γ ⊢ A
+    σ Z = M
+    σ (S AinGb) = VAR AinGb
+
 
 data _⇉_ : Ctx → Ctx → Set where
     [] : {Δ : Ctx} → ∅ ⇉ Δ
