@@ -93,21 +93,21 @@ _[_] {Γ} {B = B} N M = substMulti σ N
     σ (S AinGb) = VAR AinGb
 
 
-data _⇉_ : Ctx → Ctx → Set where
-    [] : {Δ : Ctx} → ∅ ⇉ Δ
-    _,_ : {Γ Δ : Ctx} (σ : Γ ⇉ Δ) {A : Ty} → Δ ⊢ A → (Γ , A) ⇉ Δ
+-- data _⇉_ : Ctx → Ctx → Set where
+--     [] : {Δ : Ctx} → ∅ ⇉ Δ
+--     _,_ : {Γ Δ : Ctx} (σ : Γ ⇉ Δ) {A : Ty} → Δ ⊢ A → (Γ , A) ⇉ Δ
 
-lookup : {Γ Δ : Ctx} {A : Ty} → Γ ⇉ Δ → A ∈ Γ → Δ ⊢ A
-lookup (σ , M) Z = M
-lookup (σ , _) (S x) = lookup σ x
+-- lookup : {Γ Δ : Ctx} {A : Ty} → Γ ⇉ Δ → A ∈ Γ → Δ ⊢ A
+-- lookup (σ , M) Z = M
+-- lookup (σ , _) (S x) = lookup σ x
 
-subst : {Γ Δ : Ctx} {A : Ty} → Γ ⇉ Δ → Γ ⊢ A → Δ ⊢ A
-subst σ (VAR x) = lookup σ x
-subst σ TRUE = TRUE
-subst σ FALSE = TRUE
-subst σ (IF M THEN M₁ ELSE M₂) = IF (subst σ M) THEN (subst σ M₁) ELSE (subst σ M₂)
-subst σ (M ∙ N) = (subst σ M) ∙ subst σ N
-subst σ (ƛ {A = A} M) = ƛ (subst {!   !} M)
+-- subst : {Γ Δ : Ctx} {A : Ty} → Γ ⇉ Δ → Γ ⊢ A → Δ ⊢ A
+-- subst σ (VAR x) = lookup σ x
+-- subst σ TRUE = TRUE
+-- subst σ FALSE = TRUE
+-- subst σ (IF M THEN M₁ ELSE M₂) = IF (subst σ M) THEN (subst σ M₁) ELSE (subst σ M₂)
+-- subst σ (M ∙ N) = (subst σ M) ∙ subst σ N
+-- subst σ (ƛ {A = A} M) = ƛ (subst {!   !} M)
 
 data value : {Γ : Ctx} {A : Ty} → Γ ⊢ A → Set where
     value-TRUE : {Γ : Ctx} →
@@ -143,7 +143,7 @@ data _↝_ : {A : Ty} → ∅ ⊢ A → ∅ ⊢ A → Set where
     APP-BETA : {A B : Ty} {M : (∅ , A) ⊢ B} {N : ∅ ⊢ A} →
         value N →
         ------------------------------------------------
-        ((ƛ M) ∙ N) ↝ subst ([] , N) M
+        ((ƛ M) ∙ N) ↝ (M [ N ])
 
 data Progress : {A : Ty} → ∅ ⊢ A → Set where
     is-value : {A : Ty} {M : ∅ ⊢ A} →
