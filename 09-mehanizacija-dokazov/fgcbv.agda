@@ -40,6 +40,12 @@ mutual
         
     data _⊢c_ : Ctx → Ty → Set where
 
+        LET_IN : {Γ : Ctx} {A : Ty} {B : Ty} →
+          Γ ⊢c A → 
+          (Γ , A) ⊢c B →
+          ---------------
+          Γ ⊢c B 
+
         IF_THEN_ELSE_ : {Γ : Ctx} {A : Ty} →
             Γ ⊢v BOOL →
             Γ ⊢c A →
@@ -94,6 +100,7 @@ rename-c ρ (V ∙ W) = rename-v ρ V ∙ rename-v ρ W
 rename-c ρ (FST V) = FST (rename-v ρ V)
 rename-c ρ (SND V) = SND (rename-v ρ V)
 rename-c ρ (RETURN V) = RETURN (rename-v ρ V)
+rename-c ρ (LET M IN N) = LET (rename-c ρ M) IN (rename-c (extend-renaming ρ) N)
 
 extend-subst : {Γ Δ : Ctx}
   → ({A : Ty} → A ∈ Γ → Δ ⊢v A)
@@ -121,6 +128,8 @@ subst-c σ (V ∙ W) = subst-v σ V ∙ subst-v σ W
 subst-c σ (FST V) = FST (subst-v σ V)
 subst-c σ (SND V) = SND (subst-v σ V)
 subst-c σ (RETURN V) = RETURN (subst-v σ V)
+subst-c σ (LET M IN N) = LET (subst-c σ M) IN 
+  (subst-c (extend-subst σ) N)
 
 _[_] : {Γ : Ctx} {A B : Ty}
   → (Γ , B) ⊢c A
@@ -150,7 +159,13 @@ data _↝_ : {A : Ty} → ∅ ⊢c A → ∅ ⊢c A → Set where
     SND-BETA : {A B : Ty} {V : ∅ ⊢v A} {W : ∅ ⊢v B} →
         ------------------------------------------------
         SND ⟨ V , W ⟩ ↝ (RETURN W)
-
+    LET-STEP : {A B : Ty} {M M' : ∅ ⊢c A} {N : (∅ , A) ⊢c B} →
+        M ↝ M' → 
+        ------------------------------------------------
+        (LET M IN N) ↝ (LET M' IN N)
+    LET-BETA : {A B : Ty} {V : ∅ ⊢v A} {N : (∅ , A) ⊢c B} → 
+        ------------------------------------------------
+        (LET (RETURN V) IN N) ↝ (N [ V ])
 
 data progresses : {A : Ty} → ∅ ⊢c A → Set where
     is-value : {A : Ty} {V : ∅ ⊢v A} →
@@ -169,3 +184,6 @@ progress (ƛ M ∙ V) = steps APP-BETA
 progress (FST ⟨ V , W ⟩) = steps FST-BETA
 progress (SND ⟨ V , W ⟩) = steps SND-BETA
 progress (RETURN V) = is-value
+progress (LET M IN N) with progress M
+... | is-value = steps LET-BETA
+... | steps M↝M' = steps (LET-STEP M↝M')
